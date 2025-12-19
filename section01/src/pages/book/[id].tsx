@@ -1,4 +1,9 @@
+import { GetServerSidePropsContext, GetStaticPropsContext, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
 import style from './[id].module.css'
+import fetchOneBook from '@/lib/fetch-one-book';
+import { useRouter } from 'next/router';
+import { notFound } from 'next/navigation';
+import Head from 'next/head';
 
 const mockData = {
     "id": 1,
@@ -8,10 +13,81 @@ const mockData = {
     "author": "이정환",
     "publisher": "프로그래밍인사이트",
     "coverImgUrl": "https://shopping-phinf.pstatic.net/main_3888828/38888282618.20230913071643.jpg"
-  }
+}
 
-export default function Page() {
+// SSR 방식
+// export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+
+//     const id = context.params!.id;
+
+//     const book = await fetchOneBook(String(id));
+
+//     return {
+//         props: {
+//             book
+//         }
+//     }
+// }
+
+
+/**
+ * 동적 경로 페이지([id].tsx) SSG 방식 구현하기
+ * 
+ * fallback
+ * false: 404 not found 반환
+ * blocking: 즉시 생성(SSR): 빌드 타임 이후에 생성. 생성 이후로는 SSG로 동작 -> 페이지 생성이 오래 걸리는 경우 문제가 될 수 있음
+ * true: 즉시 생성(SSR) + 데이터가 없는 페이지만 미리 반환. 이후 데이터 전달 -> 속도가 빠름
+ */
+export const getStaticPaths = () => {
+    return {
+        paths: [
+            { params: {id: '1'} },
+            { params: {id: '2'} },
+            { params: {id: '3'} }
+        ],
+        fallback: true,
+    }
+}
+
+export const getStaticProps = async (context: GetStaticPropsContext) => {
+
+    const id = context.params!.id;
+    const book = await fetchOneBook(String(id));
+
+    // 북 데이터가 없으면 not found 페이지로 이동
+    if (!book) {
+        return {
+            notFound: true,
+        }
+    }
+
+    return {
+        props: {
+            book
+        }
+    }
+}
+
+
+export default function Page({ book }: InferGetStaticPropsType<typeof getStaticProps>) {
     
+    const router = useRouter();
+
+    if (router.isFallback) {                // fallback 상태일 때 텍스트
+        return (
+            <>  
+                <Head>
+                    <title>한입 북스</title>
+                    <meta property='og:image' content='/thumbnail.png' />
+                    <meta property='og:title' content='한입 북스' />
+                    <meta property='og:description' content='한입 북스에 등록된 도서들을 만나보세요' />
+                </Head>
+                <div>로딩중입니다...</div>
+            </>   
+        )
+     } 
+    if (!book) return 'Book load error';    // 에러 발생 텍스트
+
     const {
         id, 
         title, 
@@ -20,17 +96,25 @@ export default function Page() {
         author,
         publisher,
         coverImgUrl,
-    } = mockData;
+    } = book;
 
     return (
-        <div className={style.container}>
-            <div className={style.cover_img_container} style={{backgroundImage: `url('${coverImgUrl}')`}}>
-                <img src={coverImgUrl} />
+        <>
+            <Head>
+                <title>{title}</title>
+                <meta property='og:image' content={coverImgUrl} />
+                <meta property='og:title' content={title} />
+                <meta property='og:description' content={description} />
+            </Head>
+            <div className={style.container}>
+                <div className={style.cover_img_container} style={{backgroundImage: `url('${coverImgUrl}')`}}>
+                    <img src={coverImgUrl} />
+                </div>
+                <div className={style.title}>{title}</div>
+                <div className={style.subTitle}>{subTitle}</div>
+                <div className={style.author}>{author} | {publisher}</div>
+                <div className={style.description}>{description}</div>
             </div>
-            <div className={style.title}>{title}</div>
-            <div className={style.subTitle}>{subTitle}</div>
-            <div className={style.author}>{author} | {publisher}</div>
-            <div className={style.description}>{description}</div>
-        </div>
+        </>
     )
 }
