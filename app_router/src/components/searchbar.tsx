@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import style from "./serachbar.module.css";
 
+
+/**
+ * useSearchParams 는 페이지 로드 전까지 값을 알 수 없기 때문에 빌드시 오류 발생
+ * -> Searchbar 컴포넌트를 오직 클라이언트에서만 실행되게 변경 -> 서버에서 실행X
+ */
 export default function Searchbar() {
     
   const router = useRouter();

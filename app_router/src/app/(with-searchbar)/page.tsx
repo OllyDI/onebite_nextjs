@@ -10,10 +10,22 @@ import { BookData } from "@/types";
  * 4. next: { tags: ['a'] }: 요청이 들어왔을 때만 데이터 캐싱 -> On-Demand Revalidate(On-Demand ISR)
  */
 
+
+/**
+ * 라우트 세그먼트
+ * 1. dynamic: 특정 페이지의 유형을 강제로 static, dynamic 페이지로 설정
+ * dynamic = auto | force-dynamic | force-static | error 
+ * auto: 기본 값, 아무것도 강제하지 않음
+ * force-dynamic: 페이지를 강제로 dynamic 페이지로 설정
+ * force-static: 페이지를 강제로 static 페이지로 성정
+ * error: 페이지를 강제로 static 페이지로 설정, 설정하면 안되는 이유가 있으면 빌드 오류 발생
+ */
+// export const dynamic = ''
+
 async function AllBooks() {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`, 
-    { cache: 'no-store' }
+    { cache: 'force-cache' }
   );
   if (!res.ok) return <div>오류가 발생했습니다 ...</div>;
   const allBooks: BookData[] = await res.json();
