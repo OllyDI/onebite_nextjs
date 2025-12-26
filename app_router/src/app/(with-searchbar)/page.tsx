@@ -1,6 +1,10 @@
 import BookItem from "@/components/book-item";
 import style from "./page.module.css";
 import { BookData } from "@/types";
+import { Suspense } from "react";
+import { delay } from "@/util/delay";
+import BookItemSkelotion from "@/components/skeleton/book-item-skeleton";
+import BookListSkeleton from "@/components/skeleton/book-list-skeleton";
 
 /**
  * Next.js fetch 메서드의 데이터 캐시 -> 기본 값이 캐싱하지 않음
@@ -23,6 +27,7 @@ import { BookData } from "@/types";
 // export const dynamic = ''
 
 async function AllBooks() {
+  await delay(3000);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`, 
     { cache: 'force-cache' }
@@ -40,6 +45,7 @@ async function AllBooks() {
 }
 
 async function RecoBooks() {
+  await delay(1000);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/random`,
     { next: { revalidate: 10 } }
@@ -56,16 +62,22 @@ async function RecoBooks() {
   )
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <div className={style.container}>
       <section>
         <h3>지금 추천하는 도서</h3>
-        <RecoBooks />
+        <Suspense fallback={<BookListSkeleton count={3} />}>
+          <RecoBooks />
+        </Suspense>
       </section>
       <section>
         <h3>등록된 모든 도서</h3>
-        <AllBooks />
+        <Suspense fallback={<BookListSkeleton count={3} />}>
+          <AllBooks />
+        </Suspense>
       </section>
     </div>
   );
