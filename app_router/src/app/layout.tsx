@@ -39,6 +39,7 @@ export default function RootLayout({ children }: Readonly<{
           </header>
           <main>{children}</main>
           <Footer />
+          <div id="modal-root"></div>
       </body>
     </html>
   );
