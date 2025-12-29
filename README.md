@@ -39,7 +39,7 @@
     </li>
   </ul>
   <br />
-  <h3>□ Nextjs app router Project - 한입북스</h3>
+  <h3>□ Nextjs App Router Project - 한입북스</h3>
   <ul>
     <li>
       <div>
