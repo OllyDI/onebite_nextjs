@@ -2,6 +2,7 @@ import { BookData } from "@/types";
 import "./globals.css";
 import style from "./layout.module.css";
 import Link from "next/link";
+import { ReactNode } from "react";
 
 /**
  * Request Memoization
@@ -28,18 +29,22 @@ async function Footer() {
 }
 
 
-export default function RootLayout({ children }: Readonly<{
+export default function RootLayout({ children, modal }: Readonly<{
   children: React.ReactNode;
+  modal: ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={style.container}>
-        <header>
+      <body>
+        <div className={style.container}>
+          <header>
             <Link href={"/"}>📚 ONEBITE BOOKS</Link>
           </header>
           <main>{children}</main>
           <Footer />
-          <div id="modal-root"></div>
+        </div>
+        {modal}
+        <div id="modal-root"></div>
       </body>
     </html>
   );

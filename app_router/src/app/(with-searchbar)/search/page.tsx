@@ -1,7 +1,7 @@
 import BookItem from "@/components/book-item";
 import BookListSkeleton from "@/components/skeleton/book-list-skeleton";
 import { BookData } from "@/types";
-import { delay } from "@/util/delay";
+import { Metadata } from "next";
 import { Suspense } from "react";
 
 /**
@@ -14,10 +14,7 @@ import { Suspense } from "react";
  * key 값을 넣어서 key가 변경 될 때마다 서스펜스를 사용
  */
 
-
-
 async function SearchResult({q}: {q: string}) {
-  await delay(1000);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/search?q=${q}`,
     { cache: 'force-cache' }
@@ -32,6 +29,24 @@ async function SearchResult({q}: {q: string}) {
       ))}
     </div>
   );
+}
+
+// 메타 데이터를 동적으로 생성
+export async function generateMetadata({ searchParams }: {
+  searchParams: Promise<{ q?: string}>;
+}): Promise<Metadata> {
+
+  const { q } = await searchParams;
+
+  return {
+    title: `${q}: 한입 북스`,
+    description: `${q}의 검색 결과`,
+    openGraph: {
+      title: `${q}: 한입 북스`,
+      description: `${q}의 검색 결과`,
+      images: ['/thumbnail.png'],
+    }
+  }
 }
 
 export default async function Page({ searchParams }: {

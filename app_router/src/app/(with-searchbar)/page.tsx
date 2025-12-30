@@ -2,9 +2,8 @@ import BookItem from "@/components/book-item";
 import style from "./page.module.css";
 import { BookData } from "@/types";
 import { Suspense } from "react";
-import { delay } from "@/util/delay";
-import BookItemSkelotion from "@/components/skeleton/book-item-skeleton";
 import BookListSkeleton from "@/components/skeleton/book-list-skeleton";
+import { Metadata } from "next";
 
 /**
  * Next.js fetch 메서드의 데이터 캐시 -> 기본 값이 캐싱하지 않음
@@ -13,7 +12,6 @@ import BookListSkeleton from "@/components/skeleton/book-list-skeleton";
  * 3. next: { revalidate: X }: X 시간을 주기로 데이터 캐싱 -> ISR과 유사
  * 4. next: { tags: ['a'] }: 요청이 들어왔을 때만 데이터 캐싱 -> On-Demand Revalidate(On-Demand ISR)
  */
-
 
 /**
  * 라우트 세그먼트
@@ -27,7 +25,6 @@ import BookListSkeleton from "@/components/skeleton/book-list-skeleton";
 // export const dynamic = ''
 
 async function AllBooks() {
-  await delay(3000);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`, 
     { cache: 'force-cache' }
@@ -45,7 +42,6 @@ async function AllBooks() {
 }
 
 async function RecoBooks() {
-  await delay(1000);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/random`,
     { next: { revalidate: 10 } }
@@ -62,7 +58,15 @@ async function RecoBooks() {
   )
 }
 
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: '한입 북스',
+  description: '한입 북스에 등록된 도서를 만나보세요.',
+  openGraph: {
+    title: '한입 북스',
+    description: '한입 북스에 등록된 도서를 만나보세요.',
+    images: ['/thumbnail.png'],
+  },
+}
 
 export default function Home() {
   return (

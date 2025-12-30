@@ -3,6 +3,8 @@ import style from "./page.module.css";
 import { notFound } from "next/navigation";
 import ReviewItem from "@/components/review-item";
 import ReviewEditor from "@/components/review-editor";
+import Image from "next/image";
+import { Metadata } from "next";
 
 /**
  * 동적 페이지로서 기본적으로 다이나믹 페이지로 설정됨
@@ -17,14 +19,21 @@ import ReviewEditor from "@/components/review-editor";
 
 
 // generateStaticParams 정적 파라미터 생성 메서드
-export function generateStaticParams() {
-  return [{id: '1'}, {id: '2'}, {id: '3'}]
+export async function generateStaticParams() {
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`);
+  if (!res.ok) throw new Error(res.statusText);
+  const books: BookData[] = await res.json();
+
+  return books.map((book) => ({ id: book.id.toString(), }))
 }
 
 
 async function BookDetail({ id }: { id: string }) {
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${id}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${id}`,
+    { cache: 'force-cache'}
+  );
   if (!res.ok) {
     if (res.status === 404) notFound();
     return <div>오류가 발생했습니다 ...</div>;
@@ -37,7 +46,7 @@ async function BookDetail({ id }: { id: string }) {
   return (
     <section>
       <div className={style.cover_img_container} style={{ backgroundImage: `url('${coverImgUrl}')` }}>
-        <img src={coverImgUrl} />
+        <Image src={coverImgUrl} width={240} height={300} alt={`도서 ${title}의 표지 이미지`} />
       </div>
       <div className={style.title}>{title}</div>
       <div className={style.subTitle}>{subTitle}</div>
@@ -65,6 +74,31 @@ async function ReviewList({ bookId }: { bookId: string }) {
       ))}
     </section>
   )
+}
+
+
+export async function generateMetadata({ params, }: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+
+  const { id } = await params;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${id}`,
+    { cache: 'force-cache'}
+  );
+
+  if (!res.ok) throw new Error(res.statusText);
+
+  const book: BookData = await res.json();
+
+  return {
+    title: `${book.title} - 한입 북스`,
+    description: `${book.description}`,
+    openGraph: {
+      title: `${book.title} - 한입 북스`,
+      description: `${book.description}`,
+      images: [book.coverImgUrl],
+    }
+  }
 }
 
 
