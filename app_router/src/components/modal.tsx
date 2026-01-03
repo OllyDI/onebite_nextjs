@@ -21,7 +21,7 @@ export default function Modal({ children }: { children: ReactNode }) {
             className={style.modal} 
             ref={dialogRef}
             onClick={(e) => {
-                // 모달 외곽 클릭 시 뒤로가기
+                // 모달 바깥 클릭 시 뒤로가기
                 if ((e.target as any).nodeName === 'DIALOG' ) router.back();
             }}
             onClose={() => router.back()}
